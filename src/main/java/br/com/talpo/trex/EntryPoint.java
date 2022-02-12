@@ -1,34 +1,38 @@
 package br.com.talpo.trex;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Scanner;
 
 public class EntryPoint {
 
-    public static void main(String... args) {
-        String regex = new TRexBuilderImpl()
-                .startsWith()
-                .number()
-                .quantity(2)
-                .getRegex();
+    public static void main(String... args) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Arrays.stream(args).forEach((arg) -> {
+            switch (arg) {
+                case "-h":
+                case "-help":
+                    System.out.println("ajudando");
+                    return;
+            }
+        });
 
-        String testeFalso = "Oi meu chapa";
-        String testeVerdadeiro = "12 meu chapa";
+        System.out.println("Insira as funções que deseja:");
+        Arrays.stream(TRexBuilder.class.getMethods())
+                .filter(method -> !"getRegex".equals(method.getName()))
+                .forEach((method) -> System.out.println(method.getName()));
 
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcherFalso = pattern.matcher(testeFalso);
-        Matcher matcherVerdadeiro = pattern.matcher(testeVerdadeiro);
+        String input = "";
+        TRexBuilderImpl tRexBuilder = new TRexBuilderImpl();
 
-        System.out.println("Regex: " + regex);
-
-        System.out.println("Teste incorreto: ");
-        while (matcherFalso.find()) {
-            System.out.println(matcherFalso.group());
+        Scanner scanner = new Scanner(System.in);
+        while (scanner.hasNext()) {
+            input = scanner.next();
+            if (";".equals(input)) break;
+            TRexBuilder.class.getMethod(input, null).invoke(tRexBuilder);
         }
 
-        System.out.println("Teste correto: ");
-        while (matcherVerdadeiro.find()) {
-            System.out.println(matcherVerdadeiro.group());
-        }
+        System.out.println(tRexBuilder.getRegex());
+
+        //TODO passar parametros
     }
 }
